@@ -30,8 +30,8 @@ Dans ce travail de laboratoire, vous allez configurer des routeurs Cisco émulé
 -	Capture Sniffer avec filtres précis sur la communication à épier
 -	Activation du mode « debug » pour certaines fonctions du routeur
 -	Observation des protocoles IPSec
- 
- 
+
+
 ## Matériel
 
 Le logiciel d'émulation à utiliser c'est eve-ng (vous l'avez déjà employé). Vous trouverez ici un [guide très condensé](files/Manuel_EVE-NG.pdf) pour l'utilisation et l'installation de eve-ng.
@@ -90,7 +90,7 @@ Vérifier que le projet a été importé correctement. Pour cela, nous allons co
 
 ### A faire...
 
-- Contrôlez l’état de toutes vos interfaces dans les deux routeurs et le routeur qui simule l'Internet - Pour contrôler l’état de vos interfaces (dans R1, par exmeple) les commandes suivantes sont utiles :
+- Contrôlez l’état de toutes vos interfaces dans les deux routeurs et le routeur qui simule l'Internet - Pour contrôler l’état de vos interfaces (dans R1, par exemple) les commandes suivantes sont utiles :
 
 ```
 R1# show ip interface brief
@@ -106,7 +106,9 @@ Un « protocol » différent de `up` indique la plupart du temps que l’interfa
 
 ---
 
-**Réponse :**  
+**Réponse :**  La machine "VPC" n'avait pas d'adresse IP. Nous avons donc configuré l'adresse IP dynamique avec la commande `dhcp` . 
+
+Après cela, la machine a récupéré l'adresse 172.17.1.100 et il était possible de pinger son routeur.
 
 ---
 
@@ -143,7 +145,7 @@ Pour votre topologie il est utile de contrôler la connectivité entre :
 
 ---
 
-**Réponse :**  
+**Réponse :**  Les pings sont tous passés.
 
 ---
 
@@ -166,7 +168,7 @@ Pour déclencher et pratiquer les captures vous allez « pinger » votre routeur
 
 ---
 
-**Screenshots :**  
+**Screenshots :**  ![](images/ping0.png)
 
 ---
 
@@ -188,8 +190,8 @@ Nous allons établir un VPN IKE/IPsec entre le réseau de votre « loopback 1 »
 
 Sur le routeur R1 nous activons un « proposal » IKE. Il s’agit de la configuration utilisée pour la phase 1 du protocole IKE. Le « proposal » utilise les éléments suivants :
 
-| Element          | Value                                                                                                        |
-|------------------|----------------------------------------------------------------------------------------------------------------------|
+| Element | Value |
+| ------- | ----- |
 | Encryption       | AES 256 bits    
 | Signature        | Basée sur SHA-1                                                                                                      |
 | Authentification | Preshared Key                                                                                                        |
@@ -233,11 +235,15 @@ crypto isakmp keepalive 30 3
 
 Vous pouvez consulter l’état de votre configuration IKE avec les commandes suivantes. Faites part de vos remarques :
 
+<img src="images/ike-r1.png" style="zoom:80%;" />
+
+<img src="images/ike-r2.png" style="zoom:80%;" />
+
 **Question 4: Utilisez la commande `show crypto isakmp policy` et faites part de vos remarques :**
 
 ---
 
-**Réponse :**  
+**Réponse :**  ??
 
 ---
 
@@ -246,7 +252,7 @@ Vous pouvez consulter l’état de votre configuration IKE avec les commandes su
 
 ---
 
-**Réponse :**  
+**Réponse :**  la clé partagée est *cisco-1*, ce qui n'est pas une clé suffisamment forte pour être utilisée en pratique
 
 ---
 
@@ -341,6 +347,12 @@ Pensez à démarrer votre sniffer sur la sortie du routeur R2 vers internet avan
 
 **Réponse :**  
 
+![](images/ping1.png)
+
+
+
+On voit qu'on ne voit plus les paquets ICMP mais des paquets ESP, avec une payload chiffrée
+
 ---
 
 **Question 7: Reportez dans votre rapport une petite explication concernant les différents « timers » utilisés par IKE et IPsec dans cet exercice (recherche Web). :**
@@ -356,7 +368,6 @@ Pensez à démarrer votre sniffer sur la sortie du routeur R2 vers internet avan
 
 En vous appuyant sur les notions vues en cours et vos observations en laboratoire, essayez de répondre aux questions. À chaque fois, expliquez comment vous avez fait pour déterminer la réponse exacte (capture, config, théorie, ou autre).
 
-
 **Question 8: Déterminez quel(s) type(s) de protocole VPN a (ont) été mis en œuvre (IKE, ESP, AH, ou autre).**
 
 ---
@@ -364,7 +375,6 @@ En vous appuyant sur les notions vues en cours et vos observations en laboratoir
 **Réponse :**  
 
 ---
-
 
 **Question 9: Expliquez si c’est un mode tunnel ou transport.**
 
