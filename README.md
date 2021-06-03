@@ -163,12 +163,15 @@ Pour déclencher et pratiquer les captures vous allez « pinger » votre routeur
 -	Une trace sniffer (Wireshark) à la sortie du routeur R2 vers Internet. Si vous ne savez pas utiliser Wireshark avec eve-ng, référez-vous au document explicatif eve-ng. Le filtre de **capture** (attention, c'est un filtre de **capture** et pas un filtre d'affichage) suivant peut vous aider avec votre capture : `ip host 193.100.100.1`. 
 -	Les messages de R1 avec `debug ip icmp`.
 
-
 **Question 3: Montrez vous captures**
 
 ---
 
-**Screenshots :**  ![](images/ping0.png)
+**Screenshots :**  
+
+![](images/ping0.png)![](images/ping1-r1.png)
+
+
 
 ---
 
@@ -235,18 +238,20 @@ crypto isakmp keepalive 30 3
 
 Vous pouvez consulter l’état de votre configuration IKE avec les commandes suivantes. Faites part de vos remarques :
 
-<img src="images/ike-r1.png" style="zoom:80%;" />
+<img src="images/ike-r1.png" style="zoom:75%;" />
 
-<img src="images/ike-r2.png" style="zoom:80%;" />
+<img src="images/ike-r2.png" style="zoom:75%;" />
 
 **Question 4: Utilisez la commande `show crypto isakmp policy` et faites part de vos remarques :**
 
 ---
 
-**Réponse :**  ??
+**Réponse :**  Les algorithmes utilisés par RX2 sont aujourd'hui considérés comme faible:
+
+- Triple DES devrait être changé pour AES
+- MD5 devrait être changé par SHA-1
 
 ---
-
 
 **Question 5: Utilisez la commande `show crypto isakmp key` et faites part de vos remarques :**
 
@@ -349,9 +354,13 @@ Pensez à démarrer votre sniffer sur la sortie du routeur R2 vers internet avan
 
 ![](images/ping1.png)
 
+![](images/ping1-r1.png)
 
+On voit qu'on ne voit plus les paquets ICMP mais des paquets ESP, avec une payload chiffrée.
 
-On voit qu'on ne voit plus les paquets ICMP mais des paquets ESP, avec une payload chiffrée
+Cependant, dans le réseau local de R1 les paquets ont bien été déchiffrés car il reçoit le ping. 
+
+La connexion IPSec est donc fonctionnelle.
 
 ---
 
@@ -359,7 +368,18 @@ On voit qu'on ne voit plus les paquets ICMP mais des paquets ESP, avec une paylo
 
 ---
 
-**Réponse :**  
+**Réponse :** 
+
+Pour ISAKMP : 
+
+- Le `lifetime` correspond à la durée durant laquelle la SA est valide. Après son expiration une nouvelle négotiation de clé doit être faite. 
+
+- Le paramètre `keepalive` est la durée d'attente entre les messages de "dead peer detection", qui servent à détecter si les pairs sont toujours connecté pendant la négotiation
+
+Pour IPSec:
+
+- `lifetime` est la durée de la connexion ou la taille des données échangées avant de devoir refaire la négotiation.
+- `idle-time` sert à définir le temps avant la fermeture de session lorsque l'autre réseau est déconnecté.
 
 ---
 
@@ -372,7 +392,7 @@ En vous appuyant sur les notions vues en cours et vos observations en laboratoir
 
 ---
 
-**Réponse :**  
+**Réponse :**  IKE car on utilise ISAKMP et ESP car on l'a défini dans la config.
 
 ---
 
@@ -380,33 +400,32 @@ En vous appuyant sur les notions vues en cours et vos observations en laboratoir
 
 ---
 
-**Réponse :**  
+**Réponse :**  C'est un mode tunnel. On l'a configuré à la partie ["Configuration IPSec"](#Configuration IPSec)
 
 ---
-
 
 **Question 10: Expliquez quelles sont les parties du paquet qui sont chiffrées. Donnez l’algorithme cryptographique correspondant.**
 
 ---
 
-**Réponse :**  
+**Réponse :**  Le paquet entier est chiffré par AES-191 (défini pendant la config). C'est-à-dire l'entête IP originale, les données et le "ESP trailer", qui contient le padding, sa taille et les infos sur le prochain header (vu dans la théorie).
 
 ---
-
 
 **Question 11: Expliquez quelles sont les parties du paquet qui sont authentifiées. Donnez l’algorithme cryptographique correspondant.**
 
 ---
 
-**Réponse :**  
+**Réponse :**  Le header ESP et l'ensemble des données chiffrées (vu dans la théorie). L'algorithme utilisé pendant la configuration est SHA1 (version HMAC).
 
 ---
-
 
 **Question 12: Expliquez quelles sont les parties du paquet qui sont protégées en intégrité. Donnez l’algorithme cryptographique correspondant.**
 
 ---
 
-**Réponse :**  
+**Réponse :**  Toutes les données authentifiées (header + chiffrées) sont protégées en intégrité dans la partie "Authentication Data" (source: théorie).
+
+L'algorithme utilisé est SHA1 (+HMAC)
 
 ---
